@@ -1,22 +1,32 @@
 package com.gus.util.threadio;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.HttpURLConnection;
-import java.util.Map;
 
+/**
+ * 客户端与服务端流传输通讯示例
+ * 
+ * @author gus97
+ * 
+ */
 public class FileUpload {
 
 	private static FileInputStream fis;
 
-	@SuppressWarnings("unchecked")
-	public static void main(String[] args) throws IOException, ClassNotFoundException {
-		HttpURLConnection connection = getConnectByURL("http://127.0.0.1:8080/summary/T1");
+	public static void main(String[] args) throws IOException,
+			ClassNotFoundException {
+		HttpURLConnection connection = getConnectByURL("http://127.0.0.1/summary/T1");
+		
+	
+		
 		ObjectOutputStream out = new ObjectOutputStream(
 				connection.getOutputStream());
 		fis = new FileInputStream(new File("d:/test.zip"));
@@ -33,8 +43,21 @@ public class FileUpload {
 		InputStream in = connection.getInputStream();
 
 		ObjectInputStream ois = new ObjectInputStream(in);
-		Map<String, String> map = (Map<String, String>) ois.readObject();
-		System.out.println(map);
+//		Map<String, String> map = (Map<String, String>) ois.readObject();
+//		System.out.println(map);
+		
+		byte[] bc = (byte[]) ois.readObject();
+
+		System.out.println("from server file size:" + bc.length);
+		File ret = null;
+
+		BufferedOutputStream stream = null;
+		ret = new File("d:/from_server.rar");
+		FileOutputStream fstream = new FileOutputStream(ret);
+		stream = new BufferedOutputStream(fstream);
+		stream.write(bc);
+		stream.flush();
+		stream.close();
 
 	}
 
