@@ -1,14 +1,12 @@
 package com.gus.util.threadio;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
 /**
@@ -20,45 +18,27 @@ import java.net.HttpURLConnection;
 public class FileUpload {
 
 	private static FileInputStream fis;
+	private static FileOutputStream fos;
 
 	public static void main(String[] args) throws IOException,
 			ClassNotFoundException {
 		HttpURLConnection connection = getConnectByURL("http://127.0.0.1/summary/T1");
-		
-	
-		
-		ObjectOutputStream out = new ObjectOutputStream(
-				connection.getOutputStream());
+
+		// 目标
+		OutputStream out = connection.getOutputStream();
+		// 源
 		fis = new FileInputStream(new File("d:/test.zip"));
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		byte[] b = new byte[1024];
-		int n;
-		while ((n = fis.read(b)) != -1) {
-			bos.write(b, 0, n);
-		}
-		out.writeObject(bos.toByteArray());
-		out.flush();
-		out.close();
-
-		InputStream in = connection.getInputStream();
-
-		ObjectInputStream ois = new ObjectInputStream(in);
-//		Map<String, String> map = (Map<String, String>) ois.readObject();
-//		System.out.println(map);
+		// 转换
+		B2O(fis, out);
 		
-		byte[] bc = (byte[]) ois.readObject();
-
-		System.out.println("from server file size:" + bc.length);
-		File ret = null;
-
-		BufferedOutputStream stream = null;
-		ret = new File("d:/from_server.rar");
-		FileOutputStream fstream = new FileOutputStream(ret);
-		stream = new BufferedOutputStream(fstream);
-		stream.write(bc);
-		stream.flush();
-		stream.close();
-
+		// 源
+		InputStream in = connection.getInputStream();
+		// 目标
+		fos = new FileOutputStream("d:/from_server.rar");
+		// 转换
+		B2O(in, fos);
+		System.out.println("download ok");
+		
 	}
 
 	public static HttpURLConnection getConnectByURL(String url_path)
@@ -72,5 +52,19 @@ public class FileUpload {
 		connection.setInstanceFollowRedirects(true);
 		connection.connect();
 		return connection;
+	}
+
+	// 输入流写入字节流，字节流写入输出流
+	public static void B2O(InputStream in, OutputStream out) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		byte[] b = new byte[1024];
+		int n;
+		while ((n = in.read(b)) != -1) {
+			bos.write(b, 0, n);
+		}
+		out.write(bos.toByteArray());
+		out.flush();
+		out.close();
+		in.close();
 	}
 }
