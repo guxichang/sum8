@@ -1,18 +1,18 @@
 package com.gus.service;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.gus.util.threadio.FileUpload;
 
 public class T1 extends HttpServlet {
 
@@ -23,53 +23,21 @@ public class T1 extends HttpServlet {
 		doPost(request, response);
 	}
 
-	@SuppressWarnings("resource")
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		//源
+		InputStream in = request.getInputStream();
+		//目标
+		FileOutputStream fos = new FileOutputStream(new File("d:/from_client.rar"));
+		//转换
+		FileUpload.B2O(in, fos);
+		System.out.println("upload ok");
 
-		ObjectInputStream ois = new ObjectInputStream(request.getInputStream());
-
-		try {
-			byte[] b = (byte[]) ois.readObject();
-
-			System.out.println("from client file size:" + b.length);
-			File ret = null;
-
-			BufferedOutputStream stream = null;
-			ret = new File("d:/from_client.rar");
-			FileOutputStream fstream = new FileOutputStream(ret);
-			stream = new BufferedOutputStream(fstream);
-			stream.write(b);
-			stream.flush();
-			stream.close();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		//return info
-//		Map<String, Object> map = new HashMap<String, Object>();
-//		map.put("gid", "1001");
-//		map.put("gname", "gooo");
-//		ServletOutputStream out = null;
-//		out = response.getOutputStream();
-//		ObjectOutputStream outObj = new ObjectOutputStream(out);
-//
-//		outObj.writeObject(map);
-//
-//		out.close();
-//		outObj.close();
-		
+		//源
 		FileInputStream fis = new FileInputStream(new File("d:/test.zip"));
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		byte[] b = new byte[1024];
-		int n;
-		while ((n = fis.read(b)) != -1) {
-			bos.write(b, 0, n);
-		}
-		ObjectOutputStream  out =  new ObjectOutputStream(response.getOutputStream());
-		out.writeObject(bos.toByteArray());
-		out.flush();
-		out.close();
+		//目标
+		OutputStream out =  response.getOutputStream();
+		//转换
+		FileUpload.B2O(fis, out);
 	}
-
 }
