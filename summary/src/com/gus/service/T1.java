@@ -12,7 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.gus.util.threadio.FileUpload;
+import com.gus.util.threadio.IOStream;
+
 
 public class T1 extends HttpServlet {
 
@@ -30,7 +31,7 @@ public class T1 extends HttpServlet {
 		//目标
 		FileOutputStream fos = new FileOutputStream(new File("d:/from_client.rar"));
 		//转换
-		FileUpload.B2O(in, fos);
+		IOStream.B2O(in, fos);
 		System.out.println("upload ok");
 
 		//源
@@ -38,6 +39,6 @@ public class T1 extends HttpServlet {
 		//目标
 		OutputStream out =  response.getOutputStream();
 		//转换
-		FileUpload.B2O(fis, out);
+		IOStream.B2O(fis, out);
 	}
 }
